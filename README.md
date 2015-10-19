@@ -1,4 +1,4 @@
-# Empty Project for EBSP programs
+# Empty project for EBSP programs
 
 This repository can serve as a template for [EBSP](http://www.codu.in/ebsp) programs. This README will help you get started on running and writing EBSP programs on your Parallella. We will assume you have access to the following, it should be enough to follow the [getting started guide](https://www.parallella.org/quick-start/) found on the Parallella website.
 
