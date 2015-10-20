@@ -25,7 +25,7 @@ This will compile the *host program* and a *kernel*. When you run the host progr
 
     $ bin/host_program
 
-It will load the kernel `ecore_program` to each Epiphany core. You should see the following output:
+It will load the kernel `ecore_program` on each Epiphany core. You should see the following output:
 
     $08: Hello World from processor 8 / 16
     $01: Hello World from processor 1 / 16
