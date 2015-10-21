@@ -1,9 +1,7 @@
 /*
-File: bsp_host.h
-
 This file is part of the Epiphany BSP library.
 
-Copyright (C) 2014 Buurlage Wits
+Copyright (C) 2014-2015 Buurlage Wits
 Support e-mail: <info@buurlagewits.nl>
 
 This program is free software: you can redistribute it and/or modify
@@ -21,6 +19,8 @@ and the GNU Lesser General Public License along with this program,
 see the files COPYING and COPYING.LESSER. If not, see
 <http://www.gnu.org/licenses/>.
 */
+
+#pragma once
 
 /**
  * @file host_bsp.h
@@ -57,7 +57,7 @@ see the files COPYING and COPYING.LESSER. If not, see
 #pragma once
 #include <e-hal.h>
 
-/** 
+/**
  * Write data to the Epiphany processor.
  * @param pid The pid of the target processor
  * @param src A pointer to the source data
@@ -107,33 +107,33 @@ int ebsp_read(int pid, off_t src, void* dst, int size);
  * @remarks The `argc` and `argv` parameters are ignored in the current
  * implementation.
  */
-int bsp_init(const char* e_name, int argc, char **argv);
+int bsp_init(const char* e_name, int argc, char** argv);
 
 /**
- * Set the callback for syncing.
+ * Set the (optional) callback for synchronizing epiphany cores with the
+ * host program.
  * @param cb A function pointer to the callback function
- * 
- * Synchronization callbacks are currently not implemented.
- * In a future release there will be an option to call ebsp_host_sync
- * in the Epiphany program. This will synchronize with the host processor and 
- * trigger this callback.
+ *
+ * This callback is called when all Epiphany cores have called
+ * ebsp_host_sync(). Note that this does not happen at bsp_sync().
  */
 void ebsp_set_sync_callback(void (*cb)());
 
 /**
- * Set the callback for finalizing.
+ * Set the (optional) callback for finalizing.
  * @param cb A function pointer to the callback function
  *
  * This callback is called when ebsp_spmd() finishes. It is primarily used
- * by the ebsp memory inspector.
+ * by the ebsp memory inspector and should not be needed.
  */
 void ebsp_set_end_callback(void (*cb)());
 
 /**
  * Runs the Epiphany program on the Epiphany cores.
- * @return 1 on success, 0 on failure
+ * @return 1 on success, 0 on failure (e.g. after `bsp_abort` is called on a
+ * core)
  *
- * This function will block untill the BSP program is finished.
+ * This function will block until the BSP kernel program is finished.
  */
 int ebsp_spmd();
 
@@ -181,7 +181,7 @@ int bsp_end();
 /**
  * Returns the number of available processors (Epiphany cores).
  * @return The number of available processors
- * 
+ *
  * This function may be called after bsp_init().
  */
 int bsp_nprocs();
@@ -197,8 +197,11 @@ int bsp_nprocs();
  *
  * It is not possible to send messages with different tag sizes. Doing so
  * will result in undefined behaviour.
+ *
+ * @remarks The tagsize set using this function is also used for inter-core
+ * messages.
  */
-void ebsp_set_tagsize(int *tag_bytes);
+void ebsp_set_tagsize(int* tag_bytes);
 
 /**
  * Send a message to the Epiphany cores.
@@ -213,7 +216,7 @@ void ebsp_set_tagsize(int *tag_bytes);
  * The size of the buffer pointed to by tag has to be `tagsize`, and must be
  * the same for every message being sent.
  */
-void ebsp_send_down(int pid, const void *tag, const void *payload, int nbytes);
+void ebsp_send_down(int pid, const void* tag, const void* payload, int nbytes);
 
 /**
  * Get the tagsize as set by the Epiphany program.
@@ -234,7 +237,7 @@ int ebsp_get_tagsize();
  *
  * Use only for gathering result messages at the end of a BSP program.
  */
-void ebsp_qsize(int *packets, int *accum_bytes);
+void ebsp_qsize(int* packets, int* accum_bytes);
 
 /**
  * Peek the next message.
@@ -245,7 +248,7 @@ void ebsp_qsize(int *packets, int *accum_bytes);
  *
  * Use only for gathering result messages at the end of a BSP program.
  */
-void ebsp_get_tag(int *status, void *tag);
+void ebsp_get_tag(int* status, void* tag);
 
 /**
  * Get the next message from the message queue and pop the message.
@@ -259,7 +262,7 @@ void ebsp_get_tag(int *status, void *tag);
  *
  * Use only for gathering result messages at the end of a BSP program.
  */
-void ebsp_move(void *payload, int buffer_size);
+void ebsp_move(void* payload, int buffer_size);
 
 /**
  * Get the next message, with tag, from the queue and pop the message.
@@ -273,4 +276,34 @@ void ebsp_move(void *payload, int buffer_size);
  *
  * Use only for gathering result messages at the end of a BSP program.
  */
-int ebsp_hpmove(void **tag_ptr_buf, void **payload_ptr_buf);
+int ebsp_hpmove(void** tag_ptr_buf, void** payload_ptr_buf);
+
+/**
+ * Creates a down stream
+ *
+ * @param src The data which should be streamed down to an Epiphany core.
+ * @param dst_core_id The processor identifier of the receiving core.
+ * @param nbytes The total number of bytes of the data to be streamed down.
+ * @param chunksize The size in bytes of a single chunk. Must be at least 16.
+ *
+ * This function outputs an error if `chunksize` is less than 16.
+ *
+ * @remarks The data is copied from `src`, such that the data `src` can be
+ *  safely freed or overwritten after this call.
+ */
+
+void ebsp_create_down_stream(const void* src, int dst_core_id, int nbytes,
+                             int chunksize);
+
+/**
+ * Creates an up stream
+ *
+ * @param dst_core_id The processor identifier of the sending core.
+ * @param max_nbytes The maximum number of bytes that will be sent up using
+ *  this up stream.
+ * @param chunksize The maximum number of bytes of a single chunk that can be
+ *  sent up through this stream. Must be at least 16.
+ *
+ * This function outputs an error if `chunksize` is less than 16.
+ */
+void* ebsp_create_up_stream(int dst_core_id, int max_nbytes, int chunksize);
