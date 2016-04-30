@@ -3,7 +3,7 @@
 This repository can serve as a template for [EBSP](http://www.codu.in/ebsp) programs. This README will help you get started on running and writing EBSP programs on your Parallella. We will assume you have access to the following, it should be enough to follow the [getting started guide](https://www.parallella.org/quick-start/) found on the Parallella website.
 
 - A (16-core) [Parallella](http://www.parallella.org) board.
-- Installation of a recent version of the ESDK, and an environment variable `EPIPHANY_HOME` should be set to the proper path.
+- Installation of version 2016.3 of the ESDK, and an environment variable `EPIPHANY_HOME` should be set to the proper path.
 
 By default all the build tools we need should be available. If this is not the case, installing `make`, `git` and a recent version of `gcc` should be enough.
 

@@ -19,7 +19,7 @@ E_LIB_NAMES = -le-bsp -le-lib
 
 ########################################################
 
-all: bin bin/host_program bin/ecore_program.srec
+all: bin bin/host_program bin/ecore_program.elf
 
 ########################################################
 
@@ -33,9 +33,6 @@ bin/host_program: src/host_code.c
 bin/ecore_program.elf: src/ecore_code.c
 	@echo "CC $<"
 	@e-gcc $(CFLAGS) -T ${ELDF} $(INCLUDES) -o $@ $< $(E_LIBS) $(E_LIB_NAMES)
-
-bin/%.srec: bin/%.elf
-	@e-objcopy --srec-forceS3 --output-target srec $< $@
 
 ########################################################
 
